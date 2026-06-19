@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useState, useEffect, useCallback, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 export const ChatContext = createContext(null);
@@ -13,6 +13,7 @@ export function ChatProvider({ children }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isInterrupted, setIsInterrupted] = useState(false);
   const [interruptData, setInterruptData] = useState(null);
+  const abortControllerRef = useRef(null);
 
   // ---- init ---------------------------------------------------------------
   useEffect(() => {
@@ -34,8 +35,17 @@ export function ChatProvider({ children }) {
       }
     };
     check();
-    const interval = setInterval(check, 10000);
+    const interval = setInterval(check, 100000);
     return () => clearInterval(interval);
+  }, []);
+
+  const stopStreaming = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+
+    setIsLoading(false);
   }, []);
 
   // ---- stream handler -----------------------------------------------------
@@ -152,9 +162,15 @@ export function ChatProvider({ children }) {
       }));
       files.forEach((file) => formData.append("files", file));
 
+      abortControllerRef.current = new AbortController();
+
       const res = await fetch(
         `http://localhost:8000/chat/${decision ? "resume" : ""}`,
-        { method: "POST", body: formData }
+        {
+          method: "POST",
+          body: formData,
+          signal: abortControllerRef.current.signal,
+        }
       );
 
       if (!res.ok) throw new Error(`Server responded with ${res.status}`);
@@ -226,6 +242,7 @@ export function ChatProvider({ children }) {
     resumeChat,
     selectChat,
     newChat,
+    stopStreaming,
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

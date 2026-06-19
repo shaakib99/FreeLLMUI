@@ -1,12 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ChatContext } from "../../hooks/useChat";
-import { PaperAirplaneIcon, PaperClipIcon, DocumentArrowUpIcon, PhotoIcon, MicrophoneIcon, XMarkIcon, DocumentIcon } from "@heroicons/react/24/solid";
+import { PaperAirplaneIcon, PaperClipIcon, DocumentArrowUpIcon, PhotoIcon, MicrophoneIcon, XMarkIcon, DocumentIcon, StopIcon } from "@heroicons/react/24/solid";
 
 export default function ChatInput() {
   const [text, setText] = useState("");
-  const { sendMessage } = React.useContext(ChatContext); // ✅ removed uploadFile
+  const { sendMessage, stopStreaming, isLoading: isChatStreaming } = React.useContext(ChatContext);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [attachments, setAttachments] = useState([]); // { file: File, url: string, name: string, type: string }
+  const [attachments, setAttachments] = useState([]);
+  const [isStreaming, setIsStreaming] = useState(false);
   const isDark = document.documentElement.classList.contains('dark');
   const textareaRef = useRef(null);
 
@@ -21,6 +22,10 @@ export default function ChatInput() {
     el.style.height = `${Math.min(el.scrollHeight, MAX_HEIGHT)}px`;
   }, [text]);
 
+  useEffect(() => {
+    setIsStreaming(isChatStreaming);
+  }, [isChatStreaming]);
+
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -33,24 +38,28 @@ export default function ChatInput() {
     handleSend();
   };
 
-  // ✅ Single send handler — passes text + raw files together
   const handleSend = () => {
     if (!text.trim() && attachments.length === 0) return;
-    sendMessage(text, attachments.map((a) => a.file)); // send text + File[] to context
+    setIsStreaming(true); // Set streaming to true when sending message
+    sendMessage(text, attachments.map((a) => a.file));
     setText("");
     setAttachments([]);
   };
 
-  // ✅ Just store the file locally, no upload yet
+  const handleStopStreaming = () => {
+    stopStreaming(); // Actually call the stop streaming function
+    setIsStreaming(false); // Set streaming to false when stopped
+  };
+
   const stageFile = (file) => {
     if (!file) return;
     setAttachments((prev) => [
       ...prev,
       {
-        file,                            // raw File — sent on submit
+        file,
         name: file.name,
         type: file.type,
-        url: URL.createObjectURL(file),  // local preview only
+        url: URL.createObjectURL(file),
       },
     ]);
     setShowDropdown(false);
@@ -58,12 +67,12 @@ export default function ChatInput() {
 
   const handleFileChange = (e) => {
     stageFile(e.target.files[0]);
-    e.target.value = null; // reset so same file can be re-selected
+    e.target.value = null;
   };
 
   const removeAttachment = (index) => {
     setAttachments((prev) => {
-      URL.revokeObjectURL(prev[index].url); // clean up object URL
+      URL.revokeObjectURL(prev[index].url);
       return prev.filter((_, i) => i !== index);
     });
   };
@@ -156,7 +165,6 @@ export default function ChatInput() {
                   <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
                 </label>
 
-                {/* ✅ type="button" prevents accidental form submit */}
                 <button
                   type="button"
                   className={`
@@ -191,22 +199,38 @@ export default function ChatInput() {
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}
             onFocus={() => setShowDropdown(false)}
+            disabled={isStreaming} // Disable textarea when streaming
           />
 
-          {/* Send button */}
-          <button
-            type="submit"
-            disabled={!text.trim() && attachments.length === 0}
-            className={`
-              self-end flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200
-              ${text.trim() || attachments.length > 0
-                ? 'bg-primary text-white hover:bg-primary/90 hover:shadow-lg hover:scale-105'
-                : 'bg-gray-200 dark:bg-gray-600 text-gray-400 dark:text-gray-300 cursor-not-allowed'
-              }
-            `}
-          >
-            <PaperAirplaneIcon className="h-5 w-5" />
-          </button>
+          {/* Send/Stop button - shows different button based on streaming state */}
+          {isStreaming ? (
+            // Stop streaming button (shown when streaming)
+            <button
+              type="button"
+              onClick={handleStopStreaming}
+              className={`
+                self-end flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200
+                bg-red-500 text-white hover:bg-red-600 hover:shadow-lg hover:scale-105
+              `}
+            >
+              <StopIcon className="h-5 w-5" />
+            </button>
+          ) : (
+            // Send message button (shown when not streaming)
+            <button
+              type="submit"
+              className={`
+                self-end flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200
+                ${text.trim() || attachments.length > 0
+                  ? 'bg-primary text-white hover:bg-primary/90 hover:shadow-lg hover:scale-105'
+                  : 'bg-gray-200 dark:bg-gray-600 text-gray-400 dark:text-gray-300 cursor-not-allowed'
+                }
+              `}
+              disabled={!text.trim() && attachments.length === 0}
+            >
+              <PaperAirplaneIcon className="h-5 w-5" />
+            </button>
+          )}
         </form>
       </div>
     </div>
