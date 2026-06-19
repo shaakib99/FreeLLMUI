@@ -10,9 +10,17 @@ export default function ChatWindow() {
   const isDark = document.documentElement.classList.contains("dark");
   const messagesEndRef = useRef(null);
 
+  const prevMessageCount = useRef(messages.length);
+
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading, isInterrupted]);
+    if (messages.length > prevMessageCount.current) {
+      messagesEndRef.current?.scrollIntoView({
+        behavior: "smooth",
+      });
+    }
+
+    prevMessageCount.current = messages.length;
+  }, [messages]);
 
   return (
     <section className={`
