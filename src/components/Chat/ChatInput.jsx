@@ -197,7 +197,7 @@ export default function ChatInput() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-2xl mx-auto px-4">
+    <div className="fixed bottom-6 left-1/2 transform -translate-x-1/3 z-50 w-full max-w-2xl mx-auto px-2">
       <div
         className={`
           rounded-2xl shadow-2xl backdrop-blur-sm transition-all duration-300 border-2 p-2
