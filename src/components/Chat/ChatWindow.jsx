@@ -24,12 +24,11 @@ export default function ChatWindow() {
 
   return (
     <section className={`
-      flex flex-col flex-1 overflow-hidden transition-colors duration-200
-      ${isDark ? "bg-dark-bg" : "bg-gray-50"} pb-32
+      flex flex-col flex-1 overflow-hidden transition-colors duration-200 
     `}>
       <div className={`
         flex-1 overflow-y-auto p-4 space-y-4 transition-colors duration-200
-        ${isDark ? "bg-dark-bg" : "bg-gray-50"}
+        ${isDark ? "bg-dark-bg" : "bg-gray-50"} pt-12
       `}>
         {messages.map((msg) => (
           <ChatMessage key={msg.id} message={msg} />

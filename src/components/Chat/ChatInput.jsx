@@ -201,11 +201,7 @@ export default function ChatInput() {
       <div
         className={`
           rounded-2xl shadow-2xl backdrop-blur-sm transition-all duration-300 border-2 p-2
-          hover:shadow-3xl hover:scale-[1.02]
-          ${isDark
-            ? "bg-gray-800/95 border-gray-700"
-            : "bg-white/98 border-gray-200"
-          }
+          hover:shadow-3xl hover:scale-[1.02] border-b border-gray-400/50 bg-dark-surface/10 backdrop-blur-xl
         `}
       >
         {/* Attachment previews */}
@@ -284,7 +280,7 @@ export default function ChatInput() {
 
         <form onSubmit={handleSubmit} className="flex items-end space-x-1">
           {/* Attachment button */}
-          <div className="relative self-end mb-0.5">
+          <div className="relative self-center mb-0.5">
             <button
               type="button"
               onClick={() => setShowDropdown(!showDropdown)}
@@ -303,14 +299,16 @@ export default function ChatInput() {
             {/* Attachment dropdown */}
             <div
               className={`
-                absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2
-                rounded-lg shadow-xl border transition-all duration-200 origin-bottom z-50 min-w-[160px]
-                ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}
-                ${showDropdown
+    absolute bottom-full mb-2 rounded-xl z-50 min-w-[160px]
+    bg-gray-600/90 backdrop-blur-2xl
+    border border-white/10 shadow-2xl
+    transition-[opacity,transform] duration-200 origin-bottom
+    ${showDropdown
                   ? "opacity-100 scale-100 translate-y-0"
                   : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
                 }
-              `}
+  `}
+              style={{ left: 'calc(50% - 80px)' }}
             >
               <div className="p-2">
                 <label
@@ -368,7 +366,7 @@ export default function ChatInput() {
           </div>
 
           {/* Textarea wrapper */}
-          <div className="relative flex-1">
+          <div className="relative flex-1 ">
             {skillPopupOpen && (
               <SkillPopup
                 query={skillQuery}
@@ -386,11 +384,8 @@ export default function ChatInput() {
                 w-full px-4 py-3 rounded-2xl focus:outline-none focus:ring-2
                 transition-all duration-150 resize-none overflow-y-auto leading-6
                 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]
-                ${isDark
-                  ? "bg-gray-700 border-gray-600 text-white focus:ring-primary"
-                  : "bg-gray-50 border-gray-200 text-gray-900 focus:ring-primary"
-                }
-                border placeholder-gray-400 dark:placeholder-gray-500 focus:shadow-md
+                border placeholder-gray-400 dark:placeholder-gray-400 focus:shadow-md
+                border-b border-gray-600 bg-dark-surface/10 backdrop-blur-xl text-gray-200
               `}
               style={{ maxHeight: `${MAX_HEIGHT}px` }}
               value={text}
@@ -406,7 +401,7 @@ export default function ChatInput() {
             <button
               type="button"
               onClick={handleStopStreaming}
-              className="self-end flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 bg-red-500 text-white hover:bg-red-600 hover:shadow-lg hover:scale-105"
+              className="self-center flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 bg-red-500 text-white hover:bg-red-600 hover:shadow-lg hover:scale-105"
             >
               <StopIcon className="h-5 w-5" />
             </button>
@@ -414,7 +409,7 @@ export default function ChatInput() {
             <button
               type="submit"
               className={`
-                self-end flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200
+                self-center flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200
                 ${text.trim() || attachments.length > 0 || selectedSkill
                   ? "bg-primary text-white hover:bg-primary/90 hover:shadow-lg hover:scale-105"
                   : "bg-gray-200 dark:bg-gray-600 text-gray-400 dark:text-gray-300 cursor-not-allowed"
