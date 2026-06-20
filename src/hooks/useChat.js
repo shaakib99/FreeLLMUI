@@ -141,7 +141,7 @@ export function ChatProvider({ children }) {
 
       setMessages((prev) => [
         ...prev,
-        { id: uuidv4(), role: "user", content: displayContent },
+        { id: uuidv4(), role: "user", content: displayContent, skills },
       ]);
     }
 

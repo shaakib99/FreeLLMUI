@@ -46,6 +46,7 @@ function SkillPopup({ query, isDark, onSelect, onDismiss, anchorRef }) {
       if (!["ArrowDown", "ArrowUp", "Enter", "Escape", "Tab"].includes(e.key))
         return;
       e.preventDefault();
+      e.stopPropagation(); 
       if (e.key === "Escape") {
         onDismiss();
         return;
@@ -134,6 +135,10 @@ function SkillPopup({ query, isDark, onSelect, onDismiss, anchorRef }) {
             <button
               type="button"
               onMouseDown={(e) => {
+                e.preventDefault();
+                onSelect(skill);
+              }}
+              onSelect={(e) => {
                 e.preventDefault();
                 onSelect(skill);
               }}

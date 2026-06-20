@@ -5,6 +5,7 @@ import {
   DocumentIcon,
   ClipboardIcon,
   ClipboardDocumentCheckIcon,
+  CommandLineIcon,   // <-- ADD THIS
 } from "@heroicons/react/24/outline";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -37,7 +38,7 @@ export default function ChatMessage({ message }) {
       className={`
         flex items-end gap-2 group
         ${isUser ? "flex-row-reverse" : "flex-row"}
-        max-w-screen   /* ← prevents the wrapper from exceeding the viewport */
+        max-w-screen
       `}
     >
       {/* ---------- Avatar ---------- */}
@@ -47,8 +48,8 @@ export default function ChatMessage({ message }) {
           ${isUser
             ? "bg-primary text-white"
             : isDark
-            ? "bg-gray-600 text-gray-300"
-            : "bg-gray-200 text-gray-500"}
+              ? "bg-gray-600 text-gray-300"
+              : "bg-gray-200 text-gray-500"}
         `}
       >
         {isUser ? (
@@ -61,10 +62,34 @@ export default function ChatMessage({ message }) {
       {/* ---------- Bubble + copy button wrapper ---------- */}
       <div
         className={`
-          flex flex-col gap-1 max-w-[75%]   /* ← stop horizontal spill */
+          flex flex-col gap-1 max-w-[75%]
           ${isUser ? "items-end" : "items-start"}
         `}
       >
+        {/* ---------- Skills chips (aesthetic) ---------- */}
+        {isUser && message.skills && message.skills.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-1.5 px-1">
+            {message.skills.map((skill) => (
+              <span
+                key={skill.id}
+                className={`
+          inline-flex items-center gap-1.5 rounded-full pl-3 pr-3 py-1 text-[11px] font-semibold tracking-wide
+          backdrop-blur-md border shadow-sm
+          ${isDark
+                    ? "bg-primary/10 border-primary/20 text-gray-200 shadow-primary/5"
+                    : "bg-white/60 border-primary/15 text-gray-700 shadow-primary/10"}
+        `}
+              >
+                <span className={`
+          w-1.5 h-1.5 rounded-full
+          ${isDark ? "bg-primary/80" : "bg-primary"}
+        `} />
+                {skill.name}
+              </span>
+            ))}
+          </div>
+        )}
+
         {/* ---------- Bubble ---------- */}
         <div
           className={`
@@ -72,8 +97,8 @@ export default function ChatMessage({ message }) {
             ${isUser
               ? "bg-primary text-white rounded-t-2xl rounded-bl-2xl rounded-br-md"
               : isDark
-              ? "bg-gray-700 text-gray-100 rounded-t-2xl rounded-br-2xl rounded-bl-md"
-              : "bg-gray-100 text-gray-900 rounded-t-2xl rounded-br-2xl rounded-bl-md"}
+                ? "bg-gray-700 text-gray-100 rounded-t-2xl rounded-br-2xl rounded-bl-md"
+                : "bg-gray-100 text-gray-900 rounded-t-2xl rounded-br-2xl rounded-bl-md"}
           `}
         >
           {blocks.map((block, i) => {
@@ -87,7 +112,7 @@ export default function ChatMessage({ message }) {
                     ${isUser || isDark ? "prose-invert" : "prose-gray"}
                     prose-pre:p-0 prose-pre:bg-transparent prose-pre:m-0
                     prose-code:before:content-none prose-code:after:content-none
-                    break-words overflow-wrap-anywhere   /* ← THE WRAP RULE */
+                    break-words overflow-wrap-anywhere
                     overflow-x-hidden
                   `}
                 >
@@ -114,8 +139,8 @@ export default function ChatMessage({ message }) {
                               ${isUser
                                 ? "bg-white/20"
                                 : isDark
-                                ? "bg-gray-600"
-                                : "bg-gray-200"}
+                                  ? "bg-gray-600"
+                                  : "bg-gray-200"}
                             `}
                             {...props}
                           >
@@ -138,7 +163,7 @@ export default function ChatMessage({ message }) {
                         );
                       },
 
-                      /* ----- Tables (keep horizontal scroll inside) ----- */
+                      /* ----- Tables ----- */
                       table({ children }) {
                         return (
                           <div className="overflow-x-auto rounded-xl my-1">
@@ -220,7 +245,7 @@ export default function ChatMessage({ message }) {
           })}
         </div>
 
-        {/* ---------- Copy button (appears on hover) ---------- */}
+        {/* ---------- Copy button ---------- */}
         {!message.streaming && plainText && (
           <button
             onClick={handleCopy}
