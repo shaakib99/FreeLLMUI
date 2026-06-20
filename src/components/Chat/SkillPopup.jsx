@@ -155,13 +155,13 @@ function SkillPopup({ query, isDark, onSelect, onDismiss, anchorRef }) {
                 <span className="text-primary font-mono text-xs">/</span>
                 <span className="font-medium text-sm">{skill.name}</span>
               </span>
-              <span
+              {/* <span
                 className={`text-xs mt-0.5 line-clamp-1 ${
                   isDark ? "text-gray-400" : "text-gray-500"
                 }`}
               >
                 {skill.description}
-              </span>
+              </span> */}
             </button>
           </li>
         ))}

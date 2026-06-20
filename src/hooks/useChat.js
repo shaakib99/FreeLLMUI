@@ -106,7 +106,7 @@ export function ChatProvider({ children }) {
   }, []);
 
   // ---- send message -------------------------------------------------------
-  const sendMessage = useCallback(async (text, files = [], decision = false) => {
+  const sendMessage = useCallback(async (text, files = [], decision = false, skills = []) => {
     setIsInterrupted(false);
     setInterruptData(null);
 
@@ -154,11 +154,18 @@ export function ChatProvider({ children }) {
     setIsLoading(true);
 
     try {
+      const resolvedSkills = await Promise.all(
+        skills.map(async (skill) => ({
+          name: skill.name,
+          description: await skill.loadContent(),
+        }))
+      );
       const formData = new FormData();
       formData.append("data", JSON.stringify({
         query: text,
         checkpointer_id: checkpointerId,
         decision,
+        skills: resolvedSkills,
       }));
       files.forEach((file) => formData.append("files", file));
 
