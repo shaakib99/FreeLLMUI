@@ -38,7 +38,7 @@ export default function ChatMessage({ message }) {
       className={`
         flex items-end gap-2 group
         ${isUser ? "flex-row-reverse" : "flex-row"}
-        max-w-screen
+        max-w-screen min-w-0
       `}
     >
       {/* ---------- Avatar ---------- */}
@@ -62,7 +62,7 @@ export default function ChatMessage({ message }) {
       {/* ---------- Bubble + copy button wrapper ---------- */}
       <div
         className={`
-          flex flex-col gap-1 max-w-[75%]
+          flex flex-col gap-1 max-w-[75%] min-w-0
           ${isUser ? "items-end" : "items-start"}
         `}
       >
@@ -93,7 +93,7 @@ export default function ChatMessage({ message }) {
         {/* ---------- Bubble ---------- */}
         <div
           className={`
-            w-full px-4 py-2.5 text-sm leading-relaxed shadow-sm flex flex-col gap-2
+            w-full px-4 py-2.5 text-sm leading-relaxed shadow-sm flex flex-col gap-2 min-w-0
             ${isUser
               ? "bg-primary text-white rounded-t-2xl rounded-bl-2xl rounded-br-md"
               : isDark
@@ -108,62 +108,97 @@ export default function ChatMessage({ message }) {
                 <div
                   key={i}
                   className={`
-                    prose prose-sm max-w-none
-                    ${isUser || isDark ? "prose-invert" : "prose-gray"}
-                    prose-pre:p-0 prose-pre:bg-transparent prose-pre:m-0
-                    prose-code:before:content-none prose-code:after:content-none
-                    break-words overflow-wrap-anywhere
-                    overflow-x-hidden
-                  `}
+    prose prose-sm max-w-none w-full
+    ${isUser || isDark ? "prose-invert" : "prose-gray"}
+    prose-pre:p-0 prose-pre:bg-transparent prose-pre:m-0
+    prose-code:before:content-none prose-code:after:content-none
+  `}
                 >
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     components={{
-                      /* ----- Code blocks ----- */
+                      p({ children }) {
+                        return <p className="break-words">{children}</p>;
+                      },
+                      h1({ children }) {
+                        return <h1 className="break-words">{children}</h1>;
+                      },
+                      h2({ children }) {
+                        return <h2 className="break-words">{children}</h2>;
+                      },
+                      h3({ children }) {
+                        return <h3 className="break-words">{children}</h3>;
+                      },
+                      h4({ children }) {
+                        return <h4 className="break-words">{children}</h4>;
+                      },
+                      li({ children }) {
+                        return <li className="break-words">{children}</li>;
+                      },
+                      td({ children }) {
+                        return (
+                          <td className={`break-words px-3 py-1.5 border ${isDark ? "border-gray-600" : "border-gray-300"}`}>
+                            {children}
+                          </td>
+                        );
+                      },
+
                       code({ node, inline, className, children, ...props }) {
                         const match = /language-(\w+)/.exec(className || "");
-                        return !inline && match ? (
-                          <SyntaxHighlighter
-                            style={isDark ? oneDark : oneLight}
-                            language={match[1]}
-                            PreTag="div"
-                            className="rounded-xl text-xs my-1"
-                            {...props}
-                          >
-                            {String(children).replace(/\n$/, "")}
-                          </SyntaxHighlighter>
-                        ) : (
-                          <code
-                            className={`
-                              px-1.5 py-0.5 rounded-md text-xs font-mono
-                              ${isUser
-                                ? "bg-white/20"
-                                : isDark
-                                  ? "bg-gray-600"
-                                  : "bg-gray-200"}
-                            `}
-                            {...props}
-                          >
+
+                        // Language-specified code blocks → SyntaxHighlighter
+                        if (!inline && match) {
+                          return (
+                            <SyntaxHighlighter
+                              style={isDark ? oneDark : oneLight}
+                              language={match[1]}
+                              PreTag="div"
+                              className="rounded-xl text-xs my-1 overflow-x-auto"
+                              {...props}
+                            >
+                              {String(children).replace(/\n$/, "")}
+                            </SyntaxHighlighter>
+                          );
+                        }
+
+                        const baseClasses = `
+        rounded-md text-xs font-mono
+        ${isUser ? "bg-white/20" : isDark ? "bg-gray-600" : "bg-gray-200"}
+      `;
+
+                        // Block code WITHOUT language → wrap in <pre> with pre-wrap
+                        if (!inline) {
+                          return (
+                            <pre
+                              className={`${baseClasses} block whitespace-pre-wrap break-words overflow-x-auto my-1 p-3`}
+                              {...props}
+                            >
+                              <code>{children}</code>
+                            </pre>
+                          );
+                        }
+
+                        // Inline code
+                        return (
+                          <code className={`${baseClasses} px-1.5 py-0.5 break-all`} {...props}>
                             {children}
                           </code>
                         );
                       },
 
-                      /* ----- Links ----- */
                       a({ children, href }) {
                         return (
                           <a
                             href={href}
                             target="_blank"
                             rel="noreferrer"
-                            className="underline underline-offset-2 opacity-80 hover:opacity-100"
+                            className="underline underline-offset-2 opacity-80 hover:opacity-100 break-words"
                           >
                             {children}
                           </a>
                         );
                       },
 
-                      /* ----- Tables ----- */
                       table({ children }) {
                         return (
                           <div className="overflow-x-auto rounded-xl my-1">
@@ -178,27 +213,12 @@ export default function ChatMessage({ message }) {
                         return (
                           <th
                             className={`
-                              px-3 py-1.5 text-left font-semibold border
-                              ${isDark
-                                ? "border-gray-600 bg-gray-600"
-                                : "border-gray-300 bg-gray-200"}
-                            `}
+            break-words px-3 py-1.5 text-left font-semibold border
+            ${isDark ? "border-gray-600 bg-gray-600" : "border-gray-300 bg-gray-200"}
+          `}
                           >
                             {children}
                           </th>
-                        );
-                      },
-
-                      td({ children }) {
-                        return (
-                          <td
-                            className={`
-                              px-3 py-1.5 border
-                              ${isDark ? "border-gray-600" : "border-gray-300"}
-                            `}
-                          >
-                            {children}
-                          </td>
                         );
                       },
                     }}
